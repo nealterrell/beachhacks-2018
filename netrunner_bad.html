@@ -1,0 +1,50 @@
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+    <script type="text/javascript">
+        var cardData;
+        var imageTemplate;
+        $.getJSON("http://www.netrunnerdb.com/api/2.0/public/cards", (response) => {
+            cardData = response.data;
+            imageTemplate = response.imageUrlTemplate;
+
+        });
+
+        function showCards(option) {
+            $("#cardlist").empty();
+
+            for (var i = 0; i < cardData.length; i++) {
+                var card = cardData[i];
+                if (option == 1 && card.cost == 0 ||
+                    option == 2 && card.type_code == 'identity' ||
+                    option == 3 && card.type_code == 'hardware' && card.faction_code == 'shaper') {
+
+                    var image = $("<img/>", {
+                        src: card.image_url != undefined ? card.image_url :
+                            imageTemplate.replace("{code}", card.code)
+                    });
+
+                    image.appendTo("#cardlist");
+                }
+            }
+        }
+
+
+    </script>
+    <div id="options">
+        Show:
+        <input type="button" value="0-cost cards" onclick="showCards(1)" />
+        <input type="button" value="Identities"  onclick="showCards(2)" />
+        <input type="button" value="Shaper hardware" onclick="showCards(3)" />
+    </div>
+    <div id="cardlist">
+
+    </div>
+</body>
+</html>

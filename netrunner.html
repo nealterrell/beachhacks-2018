@@ -1,0 +1,65 @@
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+    <script type="text/javascript">
+        var cardData;
+        var imageTemplate;
+
+        // When the document is loaded, pull data about Netrunner cards from the NetrunnerDB API
+        $(document).ready(() => {
+            $("#options").hide();
+
+            $.getJSON("http://www.netrunnerdb.com/api/2.0/public/cards", (response) => {
+                // Save the card data in our variable for later
+                cardData = response.data;
+                imageTemplate = response.imageUrlTemplate;
+                // Show the filter options
+                $("#options").show();
+            });
+        });
+
+        function showCards(predicate) {
+            // Remove any images currently in the card list.
+            $("#cardlist").empty();
+
+            // Filter the cards according to the predicate function.
+            var showCards = cardData.filter(predicate);
+
+            // Convert each card into an HTML image tag.
+            var imgs = showCards.map((card) =>
+                $("<img/>", { src: card.image_url != undefined ? card.image_url : imageTemplate.replace("{code}", card.code) })
+            );
+
+            // Add each image to the card list.
+            imgs.forEach((i) => i.appendTo("#cardlist"));
+
+
+            /* OR: (not for the faint of heart)
+             
+            cardData.filter(selector)
+                .map((card) =>
+                    $("<img/>", { src: card.image_url != undefined ? card.image_url : imageTemplate.replace("{code}", card.code) })
+                )
+                .forEach((i) => i.appendTo("#cardlist"));
+
+            */
+        }
+    </script>
+    <div id="options">
+        Show:
+        <input type="button" value="0-cost cards" onclick="showCards((c) => c.cost == 0)" />
+        <input type="button" value="Identities"  onclick="showCards((c) => c.type_code == 'identity')" />
+        <input type="button" value="Shaper hardware" onclick="showCards((c) => c.type_code == 'hardware' && c.faction_code == 'shaper')" />
+        <input type="button" value="Agendas" onclick="showCards((c) => c.type_code == 'agenda')" />
+    </div>
+    <div id="cardlist">
+
+    </div>
+</body>
+</html>
